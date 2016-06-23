@@ -1,40 +1,40 @@
-%Train process
-clc;clear all;close all;
+clear all;close all;clc;
 
-%% judge whether result directory is exist
-today = datestr(now,'yyyymmdd');
-if ~exist(['./results/', today],'dir')
-    mkdir(['./results/', today])
-end
+label_filename = 'test.txt';
+[allimgIndex,allimgNames,allallLabels] = readLabelFromFile(label_filename);
+
+%% assign train data
+trainNum = size(allimgNames,1);
+imgNames = allimgNames(1:trainNum);
+allLabels = allallLabels(1:trainNum,:);
+imgIndex = (1:size(imgNames))';%allimgIndex(1:trainNum);
+stage = 6;
+
 
 %% parameter
-threshold = [100,50,10,5,5,5,0];
-rcof = [24 14];
+today = '20160418';
+threshold = [50,20,10,5,2,0.1,0];
+rcof = [24 11];
+maxR2GT = 30;
+ 
  
 %% Train LRT
-img_path = 'G:\dataset\synthdepth\';
-label_filename = 'G:\dataset\16point_synthdepth_label.txt';
-
-[allimgIndex,allimgNames,allallLabels] = readLabelFromFile(label_filename,img_path);        %read training labels
-LTM = buildingLTM();
-allVertexpos = caculateAllVertexes(allimgIndex,allallLabels,allimgNames,LTM,img_path);
+ LTM = buildingLTM();
+ 
+tic;
+allVertexpos = caculateAllVertexes(imgIndex,allLabels,imgNames,LTM);
+toc;
 
 %initialize
 nodeLTM = 1;
 LRT = {};
 first_stage_set = {};
-currImgIndex = allimgIndex(1:6:end);
-
-% for t = 1:size(currImgIndex,1)
-%     figure;
-%     imshow(imread(['./Training/Depth/',allimgNames{currImgIndex(t),1}]));
-%     title(num2str(currImgIndex(t)));
-% end
+currImgIndex = imgIndex(1:6:end);
 
 tic;
 %first stage
 disp(['********************************************** Stage: ' num2str(1) ' *************************************************************']);
-[LRT,first_stage_set] = generateLRTstage(LRT,first_stage_set,-1,currImgIndex,threshold(1,1), rcof(1,1) + rcof(1,2),nodeLTM,allVertexpos,allimgNames,LTM,img_path);
+[LRT,first_stage_set] = generateLRTstage(LRT,first_stage_set,-1,currImgIndex,threshold(1,1), rcof(1,1) + rcof(1,2),nodeLTM,allVertexpos,imgNames,LTM);
 allStagediv = cell(7,1); %all division node
 allStagediv{1,1} = first_stage_set;
 
@@ -46,7 +46,7 @@ for i = 2:7
     ig_threshold = threshold(1,i);
     
     %add data
-    cur_stage_set  = addDataStage(allimgIndex(i:6:end),last_left_set,LRT,allimgNames,img_path);
+    cur_stage_set  = addDataStage(imgIndex(i:6:end),last_left_set,LRT,imgNames);
     
     next_stage_set = {};
     % 当前stage从上个stage的div node开始
@@ -63,7 +63,7 @@ for i = 2:7
        new_stage_set = {};
        leftLTMsbling = LTM{nodeLTM,1}(3);
        if( LTM{leftLTMsbling,1}(3) ~= -1)   %左节点不是叶子节点
-           [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,currImgIndex,ig_threshold,r,leftLTMsbling,allVertexpos,allimgNames,LTM,img_path);
+           [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,currImgIndex,ig_threshold,r,leftLTMsbling,allVertexpos,imgNames,LTM);
            next_stage_set = [next_stage_set;new_stage_set];
        else
            LRT{pnode,1}(3) = -2;
@@ -73,7 +73,7 @@ for i = 2:7
        new_stage_set = {};
        rigtLTMsbling = LTM{nodeLTM,1}(4); 
        if(LTM{rigtLTMsbling,1}(3) ~= -1)
-           [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,currImgIndex,ig_threshold,r,rigtLTMsbling,allVertexpos,allimgNames,LTM,img_path);
+           [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,currImgIndex,ig_threshold,r,rigtLTMsbling,allVertexpos,imgNames,LTM);
            next_stage_set = [next_stage_set;new_stage_set];
        else
            LRT{pnode,1}(4) = -2;
@@ -83,10 +83,12 @@ for i = 2:7
    
    allStagediv{i,1} = next_stage_set;
 end
+
 toc;
 
 % save tree
-time = datestr(now,'HH-MM');
-LRTwithSep = {threshold;rcof;LRT};
-save(['./results/',today,'/',time,'_stageLRTwithSep_',num2str(size(allimgNames,1)),'_th=',num2str(threshold(1,1)),'.mat'],'LRTwithSep');
+LRTwithSep = {threshold;r;LRT};
+save(['./results/' today '/stageLRTwithSep_' num2str(threshold) '.mat'],'LRTwithSep');
 
+% accurancy = caculateAccurancy(LRT,allimgIndex,allimgNames,allallLabels,maxR2GT);
+% disp(['Accurancy : ' num2str(accurancy)]);

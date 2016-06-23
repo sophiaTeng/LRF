@@ -1,4 +1,4 @@
-%% random generate RBF features and choose maxIG RBF
+%% random generate RBF features and choose maxIG RBF- v2  (fix u to vertexes & random v)
 %
 %  call function: NULL
 %
@@ -16,10 +16,10 @@
 %              @rigtset:  the right image set after splitting
 %
 %   written by Sophia
-%   2016.01.14
+%   2016.05.20
 %%
 
-function [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(curImgIndex,allVertexpos,allimgNames,LTM,nodeLTM,dr,img_path)
+function [maxIG,bestfeat,leftset,rigtset] = Copy_of_randomGenCandidates(curImgIndex,allVertexpos,allimgNames,LTM,nodeLTM,dr,img_path)
 
 %if only one image
 if(size(curImgIndex,1) <= 1)
@@ -41,8 +41,8 @@ numImages = size(curImgIndex,1);
 %%randomly generate 
 % r = mean(allVertexpos(:,3))*dr; %取值半径
 r = dr;
-u = (rand(numOffsets,2)*2-1)*r;  %生成（0,1）间的offset u
 v = (rand(numOffsets,2)*2-1)*r;  %生成（0,1）间的offset v
+% u = (rand(numOffsets,2)*2-1)*r;  %生成（0,1）间的offset u
 %taoindex = uint32((rand(numTaos,1))*(numImages-1)+1);     %随机生成下标，用于选取tao
 f = zeros(numOffsets,numImages); 
 
@@ -51,19 +51,21 @@ for i = 1:numImages
 %     dI0 = normalizeDepth(i);
     I = imread([img_path,allimgNames{curImgIndex(i),1}]);
     
-    curVertexpos_x = repmat(currVertexpos(i,(nodeLTM-1)*3+1),numOffsets,1);
-    curVertexpos_y = repmat(currVertexpos(i,(nodeLTM-1)*3+2),numOffsets,1);  
+    curVertexpos_x = repmat(currVertexpos(i,(nodeLTM*3-2)),numOffsets,1);
+    curVertexpos_y = repmat(currVertexpos(i,(nodeLTM*3-1)),numOffsets,1);  
     
     %normolize by p0's depth
 %     uI = [uint16(curVertexpos_x+(u(:,1)/dI0)),uint16(curVertexpos_y+(u(:,2)/dI0))];
 %     vI = [uint16(curVertexpos_x+(v(:,1)/dI0)),uint16(curVertexpos_y+(v(:,2)/dI0))];
 
-    uI = [uint16(curVertexpos_x+(u(:,1))),uint16(curVertexpos_y+(u(:,2)))];
+%     uI = [uint16(curVertexpos_x+(u(:,1))),uint16(curVertexpos_y+(u(:,2)))];
+    uI = [uint16(curVertexpos_x),uint16(curVertexpos_y)];
     vI = [uint16(curVertexpos_x+(v(:,1))),uint16(curVertexpos_y+(v(:,2)))];
+
     
     %judge whether position in the range of image 0<pos<240*320
-    uI(find(uI(:,1)<=0 | uI(:,1)>=320),1) = ceil(curVertexpos_x(1,1));
-    uI(find(uI(:,2)<=0 | uI(:,2)>=240),2) = ceil(curVertexpos_y(1,1));
+%     uI(find(uI(:,1)<=0 | uI(:,1)>=320),1) = ceil(curVertexpos_x(1,1));
+%     uI(find(uI(:,2)<=0 | uI(:,2)>=240),2) = ceil(curVertexpos_y(1,1));
     vI(find(vI(:,1)<=0 | vI(:,1)>=320),1) = ceil(curVertexpos_x(1,1));
     vI(find(vI(:,2)<=0 | vI(:,2)>=240),2) = ceil(curVertexpos_y(1,1));
     
@@ -146,7 +148,8 @@ end
 [maxIG,index] = max(IG(:));
 [subx,suby] = ind2sub(size(IG),index);
 besttao = taoindex(subx,suby);
-bestfeat = [u(subx,:),v(subx,:),besttao];
+%bestfeat = [u(subx,:),v(subx,:),besttao];
+bestfeat = [0,0,v(subx,:),besttao];
 leftset = curImgIndex(find(f(subx,:) < besttao));
 rigtset = curImgIndex(find(f(subx,:) >= besttao));
 % disp(['maxIG = ' num2str(maxIG) 'index = ' num2str(index)]);

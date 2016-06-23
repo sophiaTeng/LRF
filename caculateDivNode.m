@@ -21,9 +21,16 @@ function offset = caculateDivNode(curIndex,LTM_node,allVertexpos,LTM)
 
     leftLTMsbling = LTM{LTM_node,1}(3);  
     rigtLTMsbling = LTM{LTM_node,1}(4);
-    leftoffset = [allVertexpos(curIndex,(leftLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(leftLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1)),  allVertexpos(curIndex,(leftLTMsbling*3))-allVertexpos(curIndex,(LTM_node*3))];   
-    rigtoffset = [allVertexpos(curIndex,(rigtLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(rigtLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1)),  allVertexpos(curIndex,(rigtLTMsbling*3))-allVertexpos(curIndex,(LTM_node*3))];
     
-    offset =[mean(leftoffset(:,1)),mean(leftoffset(:,2)),mean(leftoffset(:,3)),mean(rigtoffset(:,1)),mean(rigtoffset(:,2)),mean(rigtoffset(:,3))];
+    %% no depth 
+    leftoffset = [allVertexpos(curIndex,(leftLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(leftLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1))];   
+    rigtoffset = [allVertexpos(curIndex,(rigtLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(rigtLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1))];
+    offset =[mean(leftoffset(:,1)),mean(leftoffset(:,2)),mean(rigtoffset(:,1)),mean(rigtoffset(:,2))];
+    
+%     %% no hand size normolize 
+%     leftoffset = [allVertexpos(curIndex,(leftLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(leftLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1)),  allVertexpos(curIndex,(leftLTMsbling*3))-allVertexpos(curIndex,(LTM_node*3))];   
+%     rigtoffset = [allVertexpos(curIndex,(rigtLTMsbling*3-2))-allVertexpos(curIndex,(LTM_node*3-2)),  allVertexpos(curIndex,(rigtLTMsbling*3-1))-allVertexpos(curIndex,(LTM_node*3-1)),  allVertexpos(curIndex,(rigtLTMsbling*3))-allVertexpos(curIndex,(LTM_node*3))];
+%     offset =[mean(leftoffset(:,1)),mean(leftoffset(:,2)),mean(leftoffset(:,3)),mean(rigtoffset(:,1)),mean(rigtoffset(:,2)),mean(rigtoffset(:,3))];
+%     
 
 end

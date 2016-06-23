@@ -1,4 +1,4 @@
-%% generate LRT trees using a tree-wise algorithm |LRT version2
+%% generate LRT trees using a tree-wise algorithm |LRT version2 (Control depth instread of threhold)
 %
 %  call function: generateLRTstage() 
 %                       randomGenCandidates() 
@@ -25,8 +25,9 @@
 %   last modified date : 2016.03.24
 %%
 
-function [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,cur_index,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path)
+function [LRT,new_stage_set] = Copy_of_generateLRTstage(LRT,new_stage_set,pnode,cur_index,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,lrt_depth)
 
+lrt_depth_th = 8;
 
 %% node information
 % @LTM{curNodeNo,1}(1) - node type£º 1-split node, 0-division node
@@ -50,12 +51,11 @@ end
 if(size(cur_index,1) <= 1)
     maxIG = 0;
 else
-%     [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(cur_index,allVertexpos,allimgNames,LTM,LTM_node,dr,img_path);    
-    [maxIG,bestfeat,leftset,rigtset] = Copy_of_randomGenCandidates(cur_index,allVertexpos,allimgNames,LTM,LTM_node,dr,img_path);    
+    [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(cur_index,allVertexpos,allimgNames,LTM,LTM_node,dr);    
 end
 
 %% division node: IG lower than threshold
-if(maxIG <= ig_threshold)
+if(maxIG <= ig_threshold || lrt_depth > lrt_depth_th)
    % disp(['****************nodeNo:  '  num2str(curNodeNo) '  division node ']);
     offset = caculateDivNode(cur_index,LTM_node,allVertexpos,LTM);
     nodeLRTinfo = [0,pnode,-1,-1,offset];
@@ -68,12 +68,13 @@ end
 
 %% split node
 disp(['##' num2str(curNodeNo) ' :split node']);
-disp(['##LTM:  '  num2str(LTM_node) '  >> ThreholdIG = ' num2str(ig_threshold) ' | maxIG= '  num2str(maxIG) ' left:' num2str(leftset') ' | right: ' num2str(rigtset')]);
+disp(['##LTM:  '  num2str(LTM_node) ', stage_depth = ' num2str(lrt_depth) '  >> ThreholdIG = ' num2str(ig_threshold) ' | maxIG= '  num2str(maxIG) ' left:' num2str(leftset') ' | right: ' num2str(rigtset')]);
 nodeLRTinfo = [1,pnode,-1,-1,bestfeat];
 LRT{curNodeNo,1} = nodeLRTinfo;
 clear nodeLRTinfo;
-[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,leftset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path);
-[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,rigtset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path);
+lrt_depth = lrt_depth +1;
+[LRT,new_stage_set] = Copy_of_generateLRTstage(LRT,new_stage_set,curNodeNo,leftset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,lrt_depth);
+[LRT,new_stage_set] = Copy_of_generateLRTstage(LRT,new_stage_set,curNodeNo,rigtset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,lrt_depth);
 
 
 end

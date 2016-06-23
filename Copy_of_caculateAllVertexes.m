@@ -1,4 +1,4 @@
-%% caculate all vertexes' position including latent & observable (31 node)
+%% caculate all vertexes' position including latent & observable (31 node) (first vertex using the center of labels)
 %
 %  call function: imgPreprocess(),depthrevise()
 %
@@ -15,7 +15,7 @@
 %  last modified date : 2016.01.12
 %%
 
-function [allVertexpos] = caculateAllVertexes(curimgIndex,labels,imageNames,LTM,img_path)
+function [allVertexpos] = Copy_of_caculateAllVertexes(curimgIndex,labels,imageNames,LTM,img_path)
 
 disp('## Caculating Vertexpos. . . . . . ');
 
@@ -36,34 +36,36 @@ allVertexpos(:,2:3:vertexNum*3) = (labels(curimgIndex,2:3:end)*latTree')./avg;  
 
 %%caculate the each vertex depth
 for t = 1:size(imageNames,1)
-    [originx,originy,origind,I] = imgPreprocess([img_path,imageNames{t,1}],30000);
-    %取到背景深度
-        if(origind > 30000)            
-            row = ceil(originy);
-            col = ceil(originx);
-            %取该点领域为r的像素值最小的像素值
-            [x, y, d] = depthrevise(I,row,col,origind);         
-            allVertexpos(t,1) = x;
-            allVertexpos(t,2) = y;
-            allVertexpos(t,3) = d;
-        else
-            allVertexpos(t,1) = originx;
-            allVertexpos(t,2) = originy;
-            allVertexpos(t,3) = origind;
-        end
+     [originx,originy,origind,I] = imgPreprocess([img_path,imageNames{t,1}],30000);
+%     %取到背景深度
+%         if(origind > 30000)            
+%             row = ceil(originy);
+%             col = ceil(originx);
+%             %取该点领域为r的像素值最小的像素值
+%             [x, y, d] = depthrevise(I,row,col,origind);         
+%             allVertexpos(t,1) = x;
+%             allVertexpos(t,2) = y;
+%             allVertexpos(t,3) = d;
+%         else
+%             allVertexpos(t,1) = originx;
+%             allVertexpos(t,2) = originy;
+%             allVertexpos(t,3) = origind;
+%         end
+%
 %     %plot
-%     imshow(mat2gray(aftimg));
-%     hold on;
-%     plot(originx,originy,'r*');
-%     for tt = 2:16
-%         plot(labels(t,tt*3-2),labels(t,tt*3-1),'go');
-%     end
+    imshow(mat2gray(I));
+    hold on;
+    plot(originx,originy,'r*');
+    for tt = 1:16
+        plot(labels(t,tt*3-2),labels(t,tt*3-1),'go');
+    end
 %     %plot
     
+    plot(allVertexpos(t,1),allVertexpos(t,2),'b*');
     for j = 2:31
         allVertexpos(t,j*3) = I(ceil(allVertexpos(t,j*3-1)),ceil(allVertexpos(t,j*3-2)));
 %         disp(['x = ',num2str(allVertexpos(t,j*3-2)),',y = ',num2str(allVertexpos(t,j*3-1)),',depth = ',num2str(allVertexpos(t,j*3))]);
-%         plot(allVertexpos(t,j*3-2),allVertexpos(t,j*3-1),'r.');
+        plot(allVertexpos(t,j*3-2),allVertexpos(t,j*3-1),'r.');
     end
      
 %% debug
