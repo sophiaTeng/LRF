@@ -1,3 +1,5 @@
+%TRAIN LATENT REGRESSION TREE for Hand Estimation
+
 %% generate LRT trees using a tree-wise algorithm |LRT version2
 %
 %  call function: generateLRTstage() 
@@ -5,7 +7,7 @@
 %                       caculateDivNode()
 %
 %  Function: This .m file is used for build a tree only use IG
-%                   ´ÓÄ³¸ödiv node¿ªÊ¼¸ù¾İIG·ÖÁÑÊı¾İ¼¯£¬¼ÇÂ¼Ò¶½ÚµãºÍÒ¶½Úµã·Öµ½µÄÊı¾İ¼¯
+%                   ä»æŸä¸ªdiv nodeå¼€å§‹æ ¹æ®IGåˆ†è£‚æ•°æ®é›†ï¼Œè®°å½•å¶èŠ‚ç‚¹å’Œå¶èŠ‚ç‚¹åˆ†åˆ°çš„æ•°æ®é›†
 %
 %  Input:   @LRT
 %              @new_stage_set: current  div node set & next split node  set
@@ -14,26 +16,27 @@
 %              @ig_threshold : current stage infomation gain threshold
 %              @dr : RBF feature 's r 
 %              @LTM_node : current LTM node
-%              @allVertexpos £º all image 's all vertexpos
-%              @allmageNames £ºall image Names
+%              @allVertexpos ï¼š all image 's all vertexpos
+%              @allmageNames ï¼šall image Names
 %              @LTM
 %
 %  Output: @LRT 
-%               @new_stage_set£º next split node  set [¸¸½Úµã£¬LTM½Úµã£¬Êı¾İ¼¯]
+%               @new_stage_setï¼š next split node  set [çˆ¶èŠ‚ç‚¹ï¼ŒLTMèŠ‚ç‚¹ï¼Œæ•°æ®é›†]
 %
 %   written by Sophia
 %   last modified date : 2016.03.24
 %%
 
-function [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,cur_index,ig_threshold,dr,LTM_node,allVertexpos,allmageNames,LTM)
+function [LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,pnode,cur_index,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path)
+
 
 %% node information
-% @LTM{curNodeNo,1}(1) - node type£º 1-split node, 0-division node
+% @LTM{curNodeNo,1}(1) - node typeï¼š 1-split node, 0-division node
 % @LTM{curNodeNo,1}(2) - parent node
 % @LTM{curNodeNo,1}(3) - left sibling
 % @LTM{curNodeNo,1}(4) - right sibling
-% @LTM{curNodeNo,1}(5-9) - according node type£ºsplit node-RBF features
-%                                                                               /division node-left & right offsets
+% @LTM{curNodeNo,1}(5-9) - according node typeï¼šsplit node-RBF features
+%%                                                                               /division node-left & right offsets
 
 %new LRT node , decide type later
 curNodeNo = size(LRT,1)+1;  % current node no.
@@ -49,16 +52,12 @@ end
 if(size(cur_index,1) <= 1)
     maxIG = 0;
 else
-    [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(cur_index,allVertexpos,allmageNames,LTM,LTM_node,dr);
+%     [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(cur_index,allVertexpos,allimgNames,LTM,LTM_node,dr,img_path);    
+    [maxIG,bestfeat,leftset,rigtset] = randomGenCandidates(cur_index,allVertexpos,allimgNames,LTM,LTM_node,dr,img_path);    
 end
 
-disp('##');
-
-disp(['##LTMnode:  '  num2str(LTM_node) '  >> ThreholdIG = ' num2str(ig_threshold) ' | maxIG= '  num2str(maxIG)]);
-
-%IG lower than threshold
+%% division node: IG lower than threshold
 if(maxIG <= ig_threshold)
-    %division node
    % disp(['****************nodeNo:  '  num2str(curNodeNo) '  division node ']);
     offset = caculateDivNode(cur_index,LTM_node,allVertexpos,LTM);
     nodeLRTinfo = [0,pnode,-1,-1,offset];
@@ -69,12 +68,14 @@ if(maxIG <= ig_threshold)
     return;
 end
 
-%split node
-disp(['**********************nodeNo:  '  num2str(curNodeNo) '  split node ']);
+%% split node
+disp(['##' num2str(curNodeNo) ' :split node']);
+disp(['##LTM:  '  num2str(LTM_node) '  >> ThreholdIG = ' num2str(ig_threshold) ' | maxIG= '  num2str(maxIG) ' left:' num2str(leftset') ' | right: ' num2str(rigtset')]);
 nodeLRTinfo = [1,pnode,-1,-1,bestfeat];
 LRT{curNodeNo,1} = nodeLRTinfo;
 clear nodeLRTinfo;
-[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,leftset,ig_threshold,dr,LTM_node,allVertexpos,allmageNames,LTM);
-[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,rigtset,ig_threshold,dr,LTM_node,allVertexpos,allmageNames,LTM);
+[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,leftset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path);
+[LRT,new_stage_set] = generateLRTstage(LRT,new_stage_set,curNodeNo,rigtset,ig_threshold,dr,LTM_node,allVertexpos,allimgNames,LTM,img_path);
+
 
 end
