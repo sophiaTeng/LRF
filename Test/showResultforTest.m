@@ -1,3 +1,5 @@
+%TEST LATENT REGRESSION TREE for Hand Estimation
+
 %% show test result
 %
 %  call function: plotLTM()
@@ -32,7 +34,7 @@ function showResult(img,LatSet,corctset)
 end
 
 %% plot LTM node in the test image
-%       µİ¹éµØ±éÀúrlrt£¬½á¹û¿ÉÊÓ»¯
+%       é€’å½’åœ°éå†rlrtï¼Œç»“æœå¯è§†åŒ–
 %
 %  call function: plotLTM()
 %
@@ -70,7 +72,7 @@ end
 end
 
 %%
-%²âÊÔ½á¹ûµÃµ½µÄ31¸öµã¸ù¾İLTMµÄ·Ö²¼
+%æµ‹è¯•ç»“æœå¾—åˆ°çš„31ä¸ªç‚¹æ ¹æ®LTMçš„åˆ†å¸ƒ
 %
 function resultlrt = rlrt()
 rlrt = zeros(31,4);
