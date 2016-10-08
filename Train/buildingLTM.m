@@ -1,3 +1,5 @@
+%TRAIN LATENT REGRESSION TREE for Hand Estimation
+
 %% build a fix LTM
 %
 %  call function: NULL
@@ -53,9 +55,3 @@ LTM{30,1} = [7,25,-1,-1,labelindex(9)];
 LTM{31,1} = [7,25,-1,-1,labelindex(10)];
 
 end
-
-
-
-
-
-
